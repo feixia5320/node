@@ -1,0 +1,33 @@
+{
+  "userId":'1007',
+  "userName":'top',
+  "userPwd":'123456',
+  "orderList":[],
+  "cartList":[{
+      "productId":'1',
+      "productName":'aa',
+      "salePrice":'23',
+      "productImage":'1.jpg',
+      "checked":'1',
+      "productNum":'1'
+    }
+  ],
+  "addressList":[{
+      "addressId": 'aaa',
+      "userName": 'fei',
+      "streetName": 'xian',
+      "postCode": 12,
+      "tel": 123456,
+      "isDefault": true
+    },
+	{
+      "addressId": 'bb',
+      "userName": 'niu',
+      "streetName": 'xian',
+      "postCode": 12,
+      "tel": 123456,
+      "isDefault": false
+    }
+ 
+  ]
+}
