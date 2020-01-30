@@ -5,9 +5,9 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 
 var bodyParser = require('body-parser');
-var index = require('./routes/index');
+// var index = require('./routes/index');
 var users = require('./routes/users');
-var goods = require('./routes/goods')
+var news = require('./routes/news')
 
 var app = express();
 
@@ -29,7 +29,7 @@ app.use(function (req,res,next) {
     next();
   }else{
       console.log("url:"+req.originalUrl);
-      if(req.originalUrl=='/users/login' || req.originalUrl=='/users/logout' || req.originalUrl.indexOf('/goods/list')>-1){
+      if(req.originalUrl=='/users/login' || req.originalUrl=='/users/logout' || req.originalUrl.indexOf('/news/getnews')>-1){
           next();
       }else{
           res.json({
@@ -41,9 +41,9 @@ app.use(function (req,res,next) {
   }
 });
 
-app.use('/', index);
+// app.use('/', index);
 app.use('/users', users);
-app.use('/goods', goods);
+app.use('/news', news);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
