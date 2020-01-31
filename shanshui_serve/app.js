@@ -6,8 +6,10 @@ var logger = require('morgan');
 
 var bodyParser = require('body-parser');
 // var index = require('./routes/index');
+//链接mongodb数据库
+var mongoose = require('./routes/mongoconnect');
 var users = require('./routes/users');
-var news = require('./routes/news')
+var news = require('./routes/news');
 
 var app = express();
 

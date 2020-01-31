@@ -1,22 +1,7 @@
 var express = require('express');
 var router = express.Router();
-var mongoose = require('mongoose');
 var News = require('../models/news');
 
-//连接MongoDB数据库
-mongoose.connect('mongodb://127.0.0.1:27017/shanshui');
-
-mongoose.connection.on("connected", function () {
-  console.log("MongoDB connected success.")
-});
-
-mongoose.connection.on("error", function () {
-  console.log("MongoDB connected fail.")
-});
-
-mongoose.connection.on("disconnected", function () {
-  console.log("MongoDB connected disconnected.")
-});
 function resErr(res, err) {
   res.json({
     status: "1",
@@ -24,99 +9,124 @@ function resErr(res, err) {
     result: ''
   })
 };
+/*
+  //elemMatch
+  News.find(
+    // 对 `'news'` 的过滤条件不需要写在查询条件中
+    {
+      "userId": "1002",
+    }, {
+    'news': {
+      '$elemMatch': {
+        'title': 'icon'
+        }
+      }
+    }, {},
+    function (error, doc) {
+      res.json({
+        status: '0',
+        msg: doc[0].news
+      });
+    }
+  )
+  */
 //获取新闻列表
 router.get("/getnews", function (req, res, next) {
-  var userId = '1001';
-  News.findOne({ userId: userId }, function (err, doc) {
+  let curentPage = parseInt(req.param("curentPage"));
+  let pageSize = parseInt(req.param("pageSize"));
+  let sort = parseInt(req.param("sort"));
+  let sortFeild = req.param("sortFeild");
+  let skip = (curentPage - 1) * pageSize;
+  let obj = {};
+  obj[sortFeild] = sort;
+  //查数据，并分页处理
+  let goodsModel = News.find().skip(skip).limit(pageSize);
+  goodsModel.sort(obj);
+
+  goodsModel.exec(function (err, doc) {
     if (err) {
       resErr(res, err);
     } else {
-      if (doc) {
-        res.json({
-          status: '0',
-          msg: '',
-          result: doc.news
-        });
-      }
-    }
-  });
-});
-
-//新增新闻
-router.post("/addNews", function (req, res, next) {
-  var userId = '1001';
-  let title = req.body.title;
-  let url = req.body.url;
-  let date = req.body.date;
-
-  News.findOne({ userId: userId }, function (err, userDoc) {
-    if (err) {
-      resErr(res, err);
-    } else {
-      if (userDoc) {
-        let exit = false;
-        for (let i = 0; i < userDoc.news.length; i++) {
-          if (userDoc.news[i].title == title) {
-            exit = true;
-            break;
-          }
-        }
-        if (exit) {
-          res.json({
-            status: "1",
-            msg: "已存在"
-          })
+      let list = doc;
+      News.find().count().exec(function (err, doc) {
+        if (err) {
+          resErr(res, err);
         } else {
-          let obj = {
-            title: title,
-            url: url,
-            date: date
-          }
-          userDoc.news.push(obj);
-          userDoc.save(function (err2, doc2) {
-            if (err2) {
-              resErr(res, err2);
-            } else {
-              res.json({
-                status: '0',
-                msg: '',
-                result: 'suc'
-              })
+          res.json({
+            status: '0',
+            msg: '',
+            result: {
+              count: doc,
+              list: list
             }
-          })
+          });
         }
-      }
+      })
     }
   })
 });
+/*
+//方法2
+let newDat = new News({
+  title: title,
+  date: date,
+  url: url
+})
+newDat.save(function (err2) {
+  if (err2) {
+    resErr(res, err2);
+  } else {
+    res.json({
+      status: "0",
+      msg: "suc"
+    })
+  }
+})
+*/
+router.post("/addNews", function (req, res, next) {
+  let title = req.body.title;
+  let url = req.body.url;
+  let date = req.body.date;
+  News.find({ "title": title, }, function (err, doc) {
+    if (err) {
+      resErr(res, err);
+    } else if (doc.length > 0) {
+      res.json({
+        status: "1",
+        msg: "已存在"
+      })
+    } else {
+      //新增数据
+      News.update({ "title": title }, {
+        title: title,
+        date: date,
+        url: url
+      }, { "upsert": true }, function (err2, doc) {
+        if (err2) {
+          resErr(res, err2);
+        } else {
+          res.json({
+            status: "0",
+            msg: "suc"
+          })
+        }
+      })
+    }
+  })
+})
 
 // 删除新闻
 router.get("/deleteNews", function (req, res, next) {
-  var userId = '1001';
   let title = req.param("title");
-  News.findOne({ userId: userId }, function (err, userDoc) {
+  News.deleteOne({ title: title }, function (err, doc) {
     if (err) {
       resErr(res, err);
     } else {
-      if (userDoc) {
-        for (let i = 0; i < userDoc.news.length; i++) {
-          if (userDoc.news[i].title == title) {
-            userDoc.news.splice(i, 1);
-            break;
-          }
-        }
-        userDoc.save(function (err2, doc2) {
-          if (err2) {
-            resErr(res, err2);
-          } else {
-            res.json({
-              status: '0',
-              msg: '',
-              result: 'suc'
-            })
-          }
-        })
-      }
+      res.json({
+        status: '0',
+        msg: '',
+        result: 'suc'
+      })
     }
   })
 });
