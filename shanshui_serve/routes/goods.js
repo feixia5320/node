@@ -74,7 +74,6 @@ router.post("/addCart", function (req,res,next) {
             msg:err.message
         })
     }else{
-        console.log("userDoc:"+userDoc);
         if(userDoc){
           var goodsItem = '';
           userDoc.cartList.forEach(function (item) {

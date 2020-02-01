@@ -1,5 +1,7 @@
 /**
  * Created by jacksoft on 17/4/26.
+ * 使用方法1
+ * new Date().Format('yyyy-MM-dd hh:mm:ss');
  */
 Date.prototype.Format = function (fmt) {
   var o = {

@@ -87,7 +87,6 @@ router.get("/checkLogin", function (req, res, next) {
 });
 router.get("/getCartCount", function (req, res, next) {
   if (req.cookies && req.cookies.userId) {
-    console.log("userId:" + req.cookies.userId);
     var userId = req.cookies.userId;
     User.findOne({ "userId": userId }, function (err, doc) {
       if (err) {
