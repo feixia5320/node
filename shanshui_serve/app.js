@@ -25,14 +25,18 @@ app.use(express.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
+//http://localhost:3000/logo.jpg
 app.use(express.static(path.join(__dirname, 'public')));
+//http://localhost:3000/uploads/logo.jpg
+app.use('/uploads',express.static(path.join(__dirname, 'uploads')))
 
 app.use(function (req, res, next) {
   addVisit(req);
   if (req.cookies.userId) {
     next();
   } else {
-    if (req.originalUrl == '/users/login' || req.originalUrl == '/users/logout' || req.originalUrl.indexOf('/news/getnews') > -1) {
+    if (req.originalUrl == '/users/login' || req.originalUrl == '/users/logout' 
+      || req.originalUrl.indexOf('/news/getnews') > -1 || req.originalUrl.indexOf('/ip') > -1) {
       next();
     } else {
       res.json({

@@ -40,23 +40,22 @@ router.get("/getnews", function (req, res, next) {
   let obj = {};
   obj[sortFeild] = sort;
   //查数据，并分页处理
-  let goodsModel = News.find().skip(skip).limit(pageSize);
-  goodsModel.sort(obj);
+  let goodsModel = News.find().sort(obj).skip(skip).limit(pageSize);
 
   goodsModel.exec(function (err, doc) {
     if (err) {
       resErr(res, err);
     } else {
       let list = doc;
-      News.find().count().exec(function (err, doc) {
-        if (err) {
-          resErr(res, err);
+      News.find().count().exec(function (err1, doc1) {
+        if (err1) {
+          resErr(res, err1);
         } else {
           res.json({
             status: '0',
             msg: '',
             result: {
-              count: doc,
+              count: doc1,
               list: list
             }
           });
