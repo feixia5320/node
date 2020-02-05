@@ -5,6 +5,7 @@ var multer = require('multer');//引入multer
 
 var Visits = require('../models/Visit');
 var Uploadfiles = require('../models/Uploadfile');
+var Active = require('../models/Active');
 // var upload = multer({dest: '../uploads/'});//设置上传文件存储地址
 
 function getTime(params) {
@@ -35,8 +36,8 @@ function addVisit(req) {
             resErr(res, err);
         } else if (doc.length > 0) {
             //增加ip
-            // if (!doc[0].iplist.includes(ip)) {
-            Visits.update(condition, { $inc: { total: 1 }, $push: { iplist: ip } }, function (err1, doc1) {
+            // if (!doc[0].iplist.includes(ip)) {    //$push: { iplist: ip } 
+            Visits.update(condition, { $inc: { total: 1 }}, function (err1, doc1) {
                 if (err1) {
                     resErr(res, err1);
                 } else {
@@ -145,7 +146,7 @@ function addFile(fileId, fileName, res) {
             } else {
                 res.json({
                     status: "0",
-                    msg: "suc"
+                    msg: fileId
                 })
             }
         }
@@ -204,8 +205,8 @@ router.get('/deleteFile', function (req, res, next) {
         }
     });
 })
-
-router.get("/getFilelist", function (req, res, next) {
+// 获取活动列表
+router.get("/getActiveList", function (req, res, next) {
     let curentPage = parseInt(req.param("curentPage"));
     let pageSize = parseInt(req.param("pageSize"));
     let sort = parseInt(req.param("sort"));
@@ -214,14 +215,14 @@ router.get("/getFilelist", function (req, res, next) {
     let obj = {};
     obj[sortFeild] = sort;
     //查数据，并分页处理
-    let model = Uploadfiles.find().sort(obj).skip(skip).limit(pageSize);
+    let model = Active.find().sort(obj).skip(skip).limit(pageSize);
 
     model.exec(function (err, doc) {
         if (err) {
             resErr(res, err);
         } else {
             let list = doc;
-            Uploadfiles.find().count().exec(function (err1, doc1) {
+            Active.find().count().exec(function (err1, doc1) {
                 if (err1) {
                     resErr(res, err1);
                 } else {
@@ -236,6 +237,59 @@ router.get("/getFilelist", function (req, res, next) {
         }
     })
 });
+//增加活动内容
+router.post("/addActive", function (req,res,next) {
+    let title = req.body.title;
+    let content = req.body.content;
+    let date = new Date().Format('yyyy-MM-dd');
+    let id = new Date().getTime();
+    Active.update(
+        { "title": title },
+        {
+            id: id,
+            date: date,
+            title: title,
+            content: content,
+        }, { "upsert": true },
+        function (err, doc) {
+            if (err) {
+                resErr(res, err);
+            } else {
+                res.json({
+                    status: "0",
+                    msg: 'suc'
+                })
+            }
+        }
+    )
+})
+router.get('/deleteActive', function (req, res, next) {
+    let id = req.param("id");
+    Active.remove({ id: id }, function (err2, doc) {
+        if (err2) {
+            resErr(res, err2);
+        } else {
+            res.json({
+                status: "0",
+                msg: "suc"
+            })
+        }
+    })
+})
+router.get('/getActiveDetail', function (req, res, next) {
+    let id = req.param("id");
+    Active.find({ id: id }, function (err, doc) {
+        if (err) {
+            resErr(res, err);
+        } else {
+            res.json({
+                status: "0",
+                msg: doc
+            })
+        }
+    })
+})
+
 
 module.exports.iprouter = router;
 module.exports.addVisit = addVisit;
