@@ -6,6 +6,7 @@ var multer = require('multer');//引入multer
 var Visits = require('../models/Visit');
 var Uploadfiles = require('../models/Uploadfile');
 var Active = require('../models/Active');
+var {formatDate} = require('../util/util');
 // var upload = multer({dest: '../uploads/'});//设置上传文件存储地址
 
 function getTime(params) {
@@ -241,13 +242,15 @@ router.get("/getActiveList", function (req, res, next) {
 router.post("/addActive", function (req,res,next) {
     let title = req.body.title;
     let content = req.body.content;
-    let date = new Date().Format('yyyy-MM-dd');
-    let id = new Date().getTime();
+    let date = req.body.date;
+    date = new Date(req.body.date)
+    let dateStr = date.Format('yyyy-MM-dd');
+    let id = date.getTime();
     Active.update(
         { "title": title },
         {
             id: id,
-            date: date,
+            date: dateStr,
             title: title,
             content: content,
         }, { "upsert": true },
